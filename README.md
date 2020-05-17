@@ -9,4 +9,5 @@
 
 接受usb输入的数据格式：90,90,90,90,90,90
 
+### 添加trajectory.py轨迹规划
 ### 使用python的serial库进行usb通信
