@@ -1,3 +1,20 @@
+'''
+Copyright (C) 2013 Travis DeWolf
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import numpy as np
 import scipy.optimize
 
@@ -49,7 +66,44 @@ class Arm3Link:
 
         return [x, y]
 
+    def inv_kin(self, xy):
+        """This is just a quick write up to find the inverse kinematics
+        for a 3-link arm, using the SciPy optimize package minimization
+        function.
 
+        Given an (x,y) position of the hand, return a set of joint angles (q)
+        using constraint based minimization, constraint is to match hand (x,y),
+        minimize the distance of each joint from it's default position (q0).
+
+        xy : tuple
+            the desired xy position of the arm
+
+        returns : list
+            the optimal [shoulder, elbow, wrist] angle configuration
+        """
+
+        def distance_to_default(q, *args):
+            """Objective function to minimize
+            Calculates the euclidean distance through joint space to the
+            default arm configuration. The weight list allows the penalty of
+            each joint being away from the resting position to be scaled
+            differently, such that the arm tries to stay closer to resting
+            state more for higher weighted joints than those with a lower
+            weight.
+
+            q : np.array
+                the list of current joint angles
+
+            returns : scalar
+                euclidean distance to the default arm position
+            """
+            # weights found with trial and error,
+            # get some wrist bend, but not much
+            weight = [1, 1, 1.3]
+            return np.sqrt(np.sum([(qi - q0i)**2 * wi
+                           for qi, q0i, wi in zip(q, self.q0, weight)]))
+
+        def x_constraint(q, xy):
             """Returns the corresponding hand xy coordinates for
             a given set of joint angle values [shoulder, elbow, wrist],
             and the above defined arm segment lengths, L
@@ -143,12 +197,8 @@ def test():
             xy = [x[xi], y[yi]]
             # run the inv_kin function, get the optimal joint angles
             q = arm.inv_kin(xy=xy)
-            print(q)
-            print('---test----')
             # find the (x,y) position of the hand given these angles
             actual_xy = arm.get_xy(q)
-            print('---actural--')
-            print(actual_xy)
             # calculate the root squared error
             error = np.sqrt(np.sum((np.array(xy) - np.array(actual_xy))**2))
             # total the error
@@ -173,16 +223,3 @@ def test():
 
 if __name__ == '__main__':
     test()
-    from numpy import pi
-    arm = Arm3Link(q0=[pi/2,pi/2,pi/2],L=[1,1,1])
-    postion = arm.get_xy([pi,pi/2,pi/2])
-    print(list(map(round,postion)))
-    theta = arm.inv_kin((-1 ,0))
-    pos = arm.get_xy(theta
-                     )
-    print(theta)
-    print('suss')
-    tan = list(map(np.tan,theta))
-    p = list(map(np.arctan,tan))
-    print(list(i*180/pi for i in p))
-    print(pos)
