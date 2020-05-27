@@ -10,22 +10,22 @@ objp[:,:2] = np.mgrid[0:6,0:9].T.reshape(-1,2)
 ## 储存棋盘格角点的世界坐标和图像坐标对
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
-images = glob.glob('img/*.jpg')
+images = glob.glob('raspi/*.jpg')
 i = 0
 for fname in images:
     img = cv.imread(fname)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     # # 找到棋盘格角点
-    ret, corners = cv.findChessboardCorners(gray, (9,6), None)
+    ret, corners = cv.findChessboardCorners(gray, (6,9), None)
     # If found, add object points, image points (after refining them)
     if ret == True:
         objpoints.append(objp)
         corners2 = cv.cornerSubPix(gray,corners, (11,11), (-1,-1), criteria)
         imgpoints.append(corners)
         # # 将角点在图像上显示
-        cv.drawChessboardCorners(img, (9,6), corners2, ret)
+        cv.drawChessboardCorners(img, (6,9), corners2, ret)
         cv.imshow('findCorners', img)
-        cv.waitKey(1)
+        cv.waitKey(1000)
 cv.destroyAllWindows()
 
 ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)

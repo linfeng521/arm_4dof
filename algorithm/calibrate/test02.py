@@ -6,6 +6,10 @@ print (a)
 R = cv2.Rodrigues(a)
 
 print (R[0])
+while True:
+    cv2.imshow('tmp', np.zeros(shape=(1000, 1000, 3), dtype=np.uint8))
+    a = cv2.waitKey(0)
+    print(a)
 # v3 = (R[0][2,1],R[0][0,2],R[0][1,0])
 # print (v3)
 # c = cv2.Rodrigues(v3)
